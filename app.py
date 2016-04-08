@@ -46,7 +46,7 @@ class StatCollector:
         self.cpu_utilization = "{percent} % user".format(percent=psutil.cpu_percent())
         self.available_memory = "{mem} MB free".format(mem=psutil.virtual_memory().available >> 20)
         self.disk_space = "{percent}% used".format(percent=psutil.disk_usage("/").percent)
-        self.node_running = self.is_process_running("node","redshift/server.js")
+        self.node_running = self.is_process_running("node","server.js")
         self.worker_running = self.is_process_running("python","queue_consumer.py")
         self.api_running = self.is_process_running("python","manage.py")
 
