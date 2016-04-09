@@ -51,9 +51,14 @@ class StatCollector:
         self.disk_space = 0
 
     def collect(self):
-        self.cpu_utilization = "{percent} % user".format(percent=psutil.cpu_percent())
-        self.available_memory = "{mem} MB free".format(mem=psutil.virtual_memory().available >> 20)
-        self.disk_space = "{percent}% used".format(percent=psutil.disk_usage("/").percent)
+        self.cpu_utilization = psutil.cpu_percent()
+        self.available_memory = psutil.virtual_memory().available >> 20
+        self.total_memory = psutil.virtual_memory().available >> 20
+        self.percent_used_memory = psutil.virtual_memory().percent
+        self.used_disk =psutil.disk_usage("/").used
+        self.total_disk = psutil.disk_usage("/").total
+        self.percent_used_disk = psutil.disk_usage("/").percent
+        self.free_disk = psutil.disk_usage("/").free
         self.node_running = self.is_process_running("node","server.js")
         self.worker_running = self.is_process_running("python","queue_consumer.py")
         self.api_running = self.is_process_running("python","manage.py")
@@ -67,9 +72,23 @@ class StatCollector:
 
     def as_json(self):
         return {
-            "memory" : self.available_memory,
-            "cpu": self.cpu_utilization,
-            "disk_space": self.disk_space,
+            "memory" : {
+                "free": self.available_memory,
+                "total": self.total_memory,
+                "percent_used": self.percent_used_memory,
+                "text": "{mem} MB free".format(mem=self.available_memory)
+            },
+            "cpu": {
+                "used_percent" : self.cpu_utilization,
+                "text": "{percent} % used".format(percent=self.cpu_utilization)
+            },
+            "disk_space": {
+                "used": self.used_disk,
+                "free": self.free_disk,
+                "total": self.total_disk,
+                "used_percent": self.percent_used_disk,
+                "text": "{percent}% used".format(percent=self.percent_used_disk)
+            },
             "node": self.node_running,
             "worker": self.worker_running,
             "api": self.api_running
