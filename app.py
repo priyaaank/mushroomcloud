@@ -1,6 +1,7 @@
 import datetime
 
 import psutil
+import tornado
 
 from tornado import websocket, web, ioloop
 
@@ -32,6 +33,13 @@ class SocketHandler(websocket.WebSocketHandler):
             self.write_message(self.stat_collector.as_json())
             ioloop.IOLoop.instance().add_timeout(datetime.timedelta(seconds=5), self.relay_status)
 
+class StatsHandler(tornado.web.RequestHandler):
+    def initialize(self, stat_collector):
+        self.stat_collector = stat_collector
+
+    def get(self):
+        self.stat_collector.collect()
+        self.write(self.stat_collector.as_json())
 
 class StatCollector:
     def __init__(self):
@@ -69,7 +77,8 @@ class StatCollector:
 
 
 app = web.Application([
-    (r'/status', SocketHandler, dict(stat_collector=StatCollector()))
+    (r'/stats/stream', SocketHandler, dict(stat_collector=StatCollector())),
+    (r'/stats/now', StatsHandler, dict(stat_collector=StatCollector()))
 ])
 
 if __name__ == '__main__':
