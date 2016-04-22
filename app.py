@@ -48,6 +48,7 @@ class StatCollector:
         self.node_running = False
         self.worker_running = False
         self.api_running = False
+        self.docx_worker_running = False
         self.disk_space = 0
 
     def collect(self):
@@ -62,6 +63,7 @@ class StatCollector:
         self.node_running = self.is_process_running("node","server.js")
         self.worker_running = self.is_process_running("python","queue_consumer.py")
         self.api_running = self.is_process_running("python","manage.py")
+        self.docx_worker_running = self.is_process_running("rq","worker")
 
     def is_process_running(self, parent, cmdline_name):
         for p in psutil.process_iter():
@@ -91,7 +93,8 @@ class StatCollector:
             },
             "node": self.node_running,
             "worker": self.worker_running,
-            "api": self.api_running
+            "api": self.api_running,
+            "docxworker": self.docx_worker_running
         }
 
 
